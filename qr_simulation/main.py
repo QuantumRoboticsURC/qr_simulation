@@ -9,7 +9,7 @@ from custom_interfaces.msg import TargetCoordinates,Coordinates
 
 class Main(Node):
     def __init__(self):
-        self.subscribe = self.create_subscription(Twist,"cmd_vel",self.update_velocity)
+        self.subscribe = self.create_subscription(Twist,"cmd_vel",self.update_data)
         self.coordinates = self.create_publisher(Coordinates,'/coordinates')
         self.linear_velocity = 0.0
         self.angular_velocity = 0.0
@@ -22,7 +22,7 @@ class Main(Node):
         self.vx = 0.0
         self.vy = 0.0
         
-    
+
     def update_data(self,data):
         self.angle += data.angular.z*self.refresh_rate 
         self.angle = (self.angle+2*math.pi)%2*math.pi
