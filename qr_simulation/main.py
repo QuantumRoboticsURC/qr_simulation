@@ -10,7 +10,7 @@ from custom_interfaces.msg import TargetCoordinates,Coordinates
 class Main(Node):
     def __init__(self):
         self.subscribe = self.create_subscription(Twist,"cmd_vel",self.update_velocity)
-        self.coordinates = self.create_publisher(Coordinates,'/coordinates')
+        self.coordinates = self.create_publisher(Coordinates,'/coordinates', 10)
         self.linear_velocity = 0.0
         self.angular_velocity = 0.0
         self.angle = 0.0
