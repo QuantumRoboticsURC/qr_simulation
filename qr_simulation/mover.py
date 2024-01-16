@@ -1,7 +1,6 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-import pygame 
 from pynput import keyboard
 
 
@@ -47,6 +46,14 @@ class Mover(Node):
             self.twist.linear.x=0.0
             self.twist.linear.y=0.5
             self.twist.angular.z=0.0 
+        elif k=="left":
+            self.twist.linear.x=0.0
+            self.twist.linear.y=0.0
+            self.twist.angular.z=-0.1
+        elif k=="right":
+            self.twist.linear.x=0.0
+            self.twist.linear.y=0.0
+            self.twist.angular.z=0.1 
         else:
             self.twist.linear.x=0.0
             self.twist.linear.y=0.0
