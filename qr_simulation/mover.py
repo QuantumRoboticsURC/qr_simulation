@@ -31,11 +31,11 @@ class Mover(Node):
         except:
             k = key.name 
         if k=="w":
-            self.twist.linear.x=0.5
+            self.twist.linear.x=-0.5
             self.twist.linear.y=0.0
             self.twist.angular.z=0.0
         elif k=="s":
-            self.twist.linear.x=-0.5
+            self.twist.linear.x=0.5
             self.twist.linear.y=0.0
             self.twist.angular.z= 0.0
         elif k=="a":
