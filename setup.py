@@ -20,7 +20,7 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [
+        'console_scripts': ['pygame=qr_simulation.main:main','mover=qr_simulation.mover:main','fg_sim=qr_simulation.followgps:main'
         ],
     },
 )
