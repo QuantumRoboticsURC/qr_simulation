@@ -32,8 +32,8 @@ class Follow_GPS(Node):
 	def __init__(self):
 		super().__init__('go_to_gps')
   
-		self.cmd_vel = self.create_publisher(Twist,'cmd_vel_fg',10)
-		self.arrived_pub = self.create_publisher(Bool,'arrived_fg',1)
+		self.cmd_vel = self.create_publisher(Twist,'cmd_vel',10)
+		self.arrived_pub = self.create_publisher(Bool,'arrived',1)
 		self.state_pub = self.create_publisher(Int8,'state',10)
 
 		self.target_coordinates = self.create_subscription(TargetCoordinates,"/target_coordinates",self.update_target,1)

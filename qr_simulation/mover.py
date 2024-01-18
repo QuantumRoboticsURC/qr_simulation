@@ -7,13 +7,13 @@ from pynput import keyboard
 class Mover(Node):
     def __init__(self):
         super().__init__("Mover")
-        self.pub = self.create_publisher(Twist,"/cmd_vel",10)
+        self.pub = self.create_publisher(Twist,"cmd_vel",10)
         self.twist = Twist()
         self.main = self.create_timer(0.01,self.main)
         
     def main(self):
             
-        listener = keyboard.Listener(on_press=self.on_press,on_release=self.on_key_release)
+        listener = keyboard.Listener(on_press=self.on_press) #on_release=self.on_key_release
         listener.start()  # start to listen on a separate thread
         listener.join() 
 
