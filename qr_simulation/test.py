@@ -101,4 +101,4 @@ def distanceBetweenCoords(current_lat,current_long,target_lat,target_long):
     return earth_radius*c
 
 print(distanceBetweenCoords(19.5970212,-99.227144, 19.61, -99.24))
-print(ll2xy(19.5970212,-99.227144, 19.61,-99.24))
+print(ll2xy(19.5970212,-99.227144, 19.61,-99.227144))

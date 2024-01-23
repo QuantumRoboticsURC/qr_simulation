@@ -3,9 +3,10 @@ import math
 import numpy as np
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Bool, Int32, Int8
+from std_msgs.msg import Bool, Int32, Int8,Float64
 from geometry_msgs.msg import Twist
-
+from custom_interfaces.msg import TargetCoordinates,Coordinates
+from .submodules.alvinxy import *
 class Simulator(Node):
 
     def __init__(self):
@@ -14,8 +15,15 @@ class Simulator(Node):
         self.twist = Twist()
         self.arrived = False
 
-        self.sub_cmd_vel = self.create_subscription(Twist,"cmd_vel", self.cmd_vel_callbak, 10)
+        self.sub_cmd_vel = self.create_subscription(Twist,"/cmd_vel", self.cmd_vel_callbak, 10)
         self.sub_arrived = self.create_subscription(Bool, "arrived", self.arrived_callbak, 10)
+        self.coordinates = self.create_publisher(Coordinates,'/coordinates',10)
+        self.angle = self.create_publisher(Float64,'/angle',10)
+        
+        
+        self.orglat = 19.5970212
+        self.orglong = -99.227144
+        
 
         pygame.init()
         pygame.display.set_caption('QR Simulación IMU')
@@ -48,7 +56,6 @@ class Simulator(Node):
         def print_status_log(self):
             print(f"Linear velocity = [x: {self.vx}, y: {self.vy}]")
             print(f"Theta angle = {self.theta}°")
-            print(f"Coordinates = [lat: {self.lat}, lon: {self.lon}]")
     
     def game(self):
             self.obj.print_status_log()
@@ -63,6 +70,7 @@ class Simulator(Node):
             for y in range(0, 800, 80):
                 pygame.draw.line(self.window_surface, (50, 50, 50), (0, y), (800, y))
             pygame.draw.circle(self.window_surface, (255, 255, 255), (self.obj.x, self.obj.y), 5)
+            self.coord_callback()
             pygame.display.update()
 
     def cmd_vel_callbak(self,msg):
@@ -70,6 +78,17 @@ class Simulator(Node):
 
     def arrived_callbak(self,msg):
         self.arrived = msg.data
+        
+    def coord_callback(self):
+        coords = Coordinates()
+        coords.latitude,coords.longitude = xy2ll(self.obj.x,self.obj.y,self.orglat,self.orglong)
+        self.coordinates.publish(coords)
+        angle = Float64()
+        angle.data = self.obj.theta
+        self.angle.publish(angle)
+        print(f"Coordinates = [lat: {coords.latitude}, lon: {coords.longitude}]")
+        
+        
 
   
 def main(args=None):
