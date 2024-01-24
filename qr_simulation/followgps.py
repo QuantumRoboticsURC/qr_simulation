@@ -95,8 +95,8 @@ class Follow_GPS(Node):
 			state = Int8()
 			arrived = Bool()
 			
-			dX= distanceBetweenCoords(self.gps_coordinates[0],self.gps_coordinates[1],self.target_coordinates[0],self.gps_coordinates[1])
-			dY = distanceBetweenCoords(self.gps_coordinates[0],self.gps_coordinates[1],self.gps_coordinates[0],self.target_coordinates[1])
+			dY= distanceBetweenCoords(self.gps_coordinates[0],self.gps_coordinates[1],self.target_coordinates[0],self.gps_coordinates[1])
+			dX= distanceBetweenCoords(self.gps_coordinates[0],self.gps_coordinates[1],self.gps_coordinates[0],self.target_coordinates[1])
 			target_angle = (math.atan2(dY,dX)+2*math.pi)%(2*math.pi)
 			
 			if(self.angle>target_angle):
@@ -117,8 +117,10 @@ class Follow_GPS(Node):
 			distance = distanceBetweenCoords(self.gps_coordinates[0],self.gps_coordinates[1],self.target_coordinates[0],self.target_coordinates[1])
 			print(f"Prev= {math.atan2(dY,dX)}")
 			print(f"distance to x = {dX} | Distance to y= {dY} ")
+			print(f"Distance {distance}")
+			print(F"Distance cal = {np.sqrt(np.power(dX,2)+np.power(dY,2))}")
 			print(f"Current angle = {self.angle}")
-
+			time.sleep(5)
 
 			while(distance>0):
 				distance = distanceBetweenCoords(self.gps_coordinates[0],self.gps_coordinates[1],self.target_coordinates[0],self.target_coordinates[1])
@@ -128,9 +130,6 @@ class Follow_GPS(Node):
 				print(f"GPS = {self.gps_coordinates}")
 				print(f"distance to x = {dX} | Distance to y= {dY} ")
 				print(f"Distance {distance}")
-       
-    
-
 
 			self.twist.linear.x = 0.0
 			arrived.data=True
