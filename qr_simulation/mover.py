@@ -12,9 +12,8 @@ class Mover(Node):
         self.main = self.create_timer(0.01,self.main)
         
     def main(self):
-            
         listener = keyboard.Listener(on_press=self.on_press) #on_release=self.on_key_release
-        listener.start()  # start to listen on a separate thread
+        listener.start()
         listener.join() 
 
     def on_key_release(self,key):
@@ -29,23 +28,23 @@ class Mover(Node):
         try: 
             k = key.char   
         except:
-            k = key.name 
+            k = key.name
         if k=="w":
-            self.twist.linear.x=-0.5
-            self.twist.linear.y=0.0
-            self.twist.angular.z=0.0
-        elif k=="s":
-            self.twist.linear.x=0.5
-            self.twist.linear.y=0.0
-            self.twist.angular.z= 0.0
-        elif k=="a":
             self.twist.linear.x=0.0
             self.twist.linear.y=-0.5
             self.twist.angular.z=0.0
-        elif k=="d":
+        elif k=="s":
             self.twist.linear.x=0.0
             self.twist.linear.y=0.5
-            self.twist.angular.z=0.0 
+            self.twist.angular.z= 0.0
+        elif k=="a":
+            self.twist.linear.x=-0.5
+            self.twist.linear.y=0.0
+            self.twist.angular.z=0.0
+        elif k=="d":
+            self.twist.linear.x=0.5
+            self.twist.linear.y=0.0
+            self.twist.angular.z=0.0
         elif k=="left":
             self.twist.linear.x=0.0
             self.twist.linear.y=0.0
@@ -53,7 +52,7 @@ class Mover(Node):
         elif k=="right":
             self.twist.linear.x=0.0
             self.twist.linear.y=0.0
-            self.twist.angular.z=0.1 
+            self.twist.angular.z=0.1
         else:
             self.twist.linear.x=0.0
             self.twist.linear.y=0.0
