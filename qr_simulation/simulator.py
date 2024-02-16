@@ -83,8 +83,8 @@ class Simulator(Node):
         def xy_to_latlon(self, x, y):
             normalized_x = self.COORDINATES_RANGE[0][0] + (x / 800) * (self.COORDINATES_RANGE[0][1] - self.COORDINATES_RANGE[0][0])
             normalized_y = self.COORDINATES_RANGE[1][0] + (y / 800) * (self.COORDINATES_RANGE[1][1] - self.COORDINATES_RANGE[1][0])
-            latitude = normalized_y + self.COORDINATES_OFFSET[0]
-            longitude = normalized_x + self.COORDINATES_OFFSET[1]
+            latitude = normalized_x + self.COORDINATES_OFFSET[1]
+            longitude = normalized_y + self.COORDINATES_OFFSET[0]
             return latitude, longitude
         
         def latlon_to_xy(self, latitude, longitude):
