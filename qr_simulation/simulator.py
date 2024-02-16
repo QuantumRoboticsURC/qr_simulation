@@ -3,7 +3,7 @@
 #Developer: @emvivas (Emiliano Vivas Rodríguez)
 #Contact: a01424732@tec.mx
 
-import rclpy, pygame, math, bisect, copy, random, numpy as np
+import rclpy, pygame, math, bisect, copy, random, time, numpy as np
 from enum import Enum
 from rclpy.node import Node
 from std_msgs.msg import Bool, Int8, Float64
@@ -13,35 +13,6 @@ from .submodules.alvinxy import xy2ll
 
 class Simulator(Node):
 
-    def __init__(self, dimension):
-        super().__init__('simulator')
-
-        #Pygame variable members and configuration
-        pygame.init()
-        pygame.display.set_caption('Quantum Robotics Simulation | Rover in Action')
-        self.DIMENSION = (dimension[0], dimension[1])
-        self.window = pygame.display.set_mode(self.DIMENSION)
-        self.clock = pygame.time.Clock()
-
-        #Class variable members
-        self.twist = Twist()
-        self.arrived = False
-        self.state = None
-        self.orglatitude = 19.5970212
-        self.orglongitude = -99.227144
-        self.rover = self.Rover((400, 400), ((19.25, 19.75), (-99, -99.50)), (0.05, 0.05))
-        self.archimedean_spiral = self.ArchimedeanSpiral(7, 7, 150, 500)
-
-        #ROS 2 subscriptions and publishers
-        self.sub_state = self.create_subscription(Int8,"/state", self.state_callback, 10)
-        self.sub_cmd_vel = self.create_subscription(Twist,"/cmd_vel", self.cmd_vel_callback, 10)
-        self.sub_arrived = self.create_subscription(Bool, "/arrived", self.arrived_callback, 10)
-        self.pub_coordinates = self.create_publisher(Coordinates,'/coordinates',10)
-        self.pub_angle = self.create_publisher(Float64,'/angle',10)
-        
-        #ROS 2 timer routines
-        self.game_timer = self.create_timer(0.01, self.game)
-    
     class Color(Enum):
         WHITE = (255, 255, 255)
         BLACK = (0, 0, 0)
@@ -56,9 +27,43 @@ class Simulator(Node):
         LIGHT_BROWN = (240, 229, 220)
         GREEN = (86, 191, 129)
 
+    def __init__(self, dimension):
+        super().__init__('simulator')
+
+        #Class variable members
+        self.twist = Twist()
+        self.arrived = False
+        self.state = None
+        self.orglatitude = 19.5970212
+        self.orglongitude = -99.227144
+        self.rover = self.Rover((400, 400), ((19.25, 19.75), (-99, -99.50)), (0.05, 0.05), pygame.time.get_ticks())
+        self.archimedean_spiral = self.ArchimedeanSpiral(7, 7, 150, 500)
+
+        #Pygame variable members and configuration
+        pygame.init()
+        pygame.display.set_caption("Quantum Robotics Simulation | Rover in Action")
+        self.DIMENSION = (dimension[0], dimension[1])
+        self.window = pygame.display.set_mode(self.DIMENSION)
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.Font(None, 15)
+        self.title_label = self.font.render("Quantum Robotics Simulator", True, self.Color.BLACK.value, self.Color.WHITE.value)
+        self.title_label_rect = self.title_label.get_rect()
+        self.title_label_rect.center = (self.title_label_rect.width//2 + 10 , 10)
+
+        #ROS 2 subscriptions and publishers
+        self.sub_state = self.create_subscription(Int8,"/state", self.state_callback, 10)
+        self.sub_cmd_vel = self.create_subscription(Twist,"/cmd_vel", self.cmd_vel_callback, 10)
+        self.sub_arrived = self.create_subscription(Bool, "/arrived", self.arrived_callback, 10)
+        self.pub_coordinates = self.create_publisher(Coordinates,'/coordinates',10)
+        self.pub_target_coordinates = self.create_publisher(TargetCoordinates,'/target_coordinates',10)
+        self.pub_angle = self.create_publisher(Float64,'/angle',10)
+        
+        #ROS 2 timer routines
+        self.game_timer = self.create_timer(0.01, self.game)
+
     class Rover:
 
-        def __init__(self, coordinates, coordinates_range, coordinates_offset):
+        def __init__(self, coordinates, coordinates_range, coordinates_offset, last_time_rotating):
             self.x, self.y = coordinates[0], coordinates[1]
             self.COORDINATES_RANGE = (coordinates_range[0], coordinates_range[1])
             self.COORDINATES_OFFSET = (coordinates_offset[0], coordinates_offset[1])
@@ -71,6 +76,9 @@ class Simulator(Node):
             self.navigation_point = None
             self.navigation_point_uncertainty = 10
             self.changed = True
+            self.is_rotating = False
+            self.last_time_rotating = last_time_rotating
+            self.delay_time_rotating = 5000
         
         def xy_to_latlon(self, x, y):
             normalized_x = self.COORDINATES_RANGE[0][0] + (x / 800) * (self.COORDINATES_RANGE[0][1] - self.COORDINATES_RANGE[0][0])
@@ -111,6 +119,7 @@ class Simulator(Node):
                         self.x >= self.navigation_point[0] - self.navigation_point_uncertainty and self.x <= self.navigation_point[0] + self.navigation_point_uncertainty and
                         self.y >= self.navigation_point[1] - self.navigation_point_uncertainty and self.y <= self.navigation_point[1] + self.navigation_point_uncertainty
                 ):
+                    self.is_rotating = True
                     self.navigation_point = self.navigation_points.pop(0)
                     target_x = self.navigation_point[0] + random.uniform(-self.navigation_point_uncertainty, self.navigation_point_uncertainty)
                     target_y = self.navigation_point[1] + random.uniform(-self.navigation_point_uncertainty, self.navigation_point_uncertainty)
@@ -179,6 +188,23 @@ class Simulator(Node):
             pygame.draw.line(self.window, self.Color.GRAY.value, (x, 0), (x, self.DIMENSION[0]))
         for y in range(0, self.DIMENSION[1], self.DIMENSION[1]//50):
             pygame.draw.line(self.window, self.Color.GRAY.value, (0, y), (self.DIMENSION[1], y))
+        position_label = self.font.render(f"Position = [x: {self.rover.x:,.3f}, y: {self.rover.y:,.3f}]", True, self.Color.BLACK.value, self.Color.WHITE.value)
+        position_label_rect = position_label.get_rect()
+        position_label_rect.center = (position_label_rect.width//2 + 10 , 25)
+        coordinates_label = self.font.render(f"Coordinates = [lat: {self.rover.latitude:,.3f}, lon: {self.rover.longitude:,.3f}]", True, self.Color.BLACK.value, self.Color.WHITE.value)
+        coordinates_label_rect = coordinates_label.get_rect()
+        coordinates_label_rect.center = (coordinates_label_rect.width//2 + 10 , 35)
+        linear_velocity_label = self.font.render(f"Linear velocity = [x: {self.rover.linear_velocity_x:,.3f}, y: {self.rover.linear_velocity_y:,.3f}]", True, self.Color.BLACK.value, self.Color.WHITE.value)
+        linear_velocity_label_rect = linear_velocity_label.get_rect()
+        linear_velocity_label_rect.center = (linear_velocity_label_rect.width//2 + 10 , 45)
+        angle_label = self.font.render(f"Angle = {self.rover.angle:,.3f}°", True, self.Color.BLACK.value, self.Color.WHITE.value)
+        angle_label_rect = angle_label.get_rect()
+        angle_label_rect.center = (angle_label_rect.width//2 + 10 , 55)
+        self.window.blit(self.title_label, self.title_label_rect)
+        self.window.blit(position_label, position_label_rect)
+        self.window.blit(coordinates_label, coordinates_label_rect)
+        self.window.blit(linear_velocity_label, linear_velocity_label_rect)
+        self.window.blit(angle_label, angle_label_rect)
 
     def draw_autonomous_routine(self, scheme_modality_draw):
         if scheme_modality_draw.value == self.ArchimedeanSpiral.SchemeModalityDraw.NONE.value:
@@ -202,13 +228,20 @@ class Simulator(Node):
         self.draw_stage()
         if self.state == 0:
             self.draw_autonomous_routine(self.ArchimedeanSpiral.SchemeModalityDraw.ALL)
-            self.rover.follow_navigation_points(copy.copy(self.archimedean_spiral.get_discrete_scheme()))
-            self.rover.update_position(dt)
+            if self.rover.is_rotating:
+                now = pygame.time.get_ticks()
+                if now - self.rover.last_time_rotating >= self.rover.delay_time_rotating:
+                    self.rover.last_time_rotating = now
+                    self.rover.is_rotating = False
+            else:
+                self.rover.follow_navigation_points(copy.copy(self.archimedean_spiral.get_discrete_scheme()))
+                self.rover.update_position(dt)
         else:
             self.rover.update_position(dt, self.twist)
         self.rover.print_status_log()
         pygame.draw.circle(self.window, self.Color.BLACK.value, (self.rover.x, self.rover.y), 5)
         self.coordinates_callback()
+        self.target_coordinates_callback()
         pygame.display.flip()
         pygame.display.update()
 
@@ -230,6 +263,12 @@ class Simulator(Node):
         angle.data = self.rover.angle
         self.pub_angle.publish(angle)
         print(f"Coordinates xy2ll = [lat: {coordinates.latitude}, lon: {coordinates.longitude}]")
+    
+    def target_coordinates_callback(self):
+        target_coordinates = TargetCoordinates()
+        target_coordinates.latitude,target_coordinates.longitude = xy2ll(self.rover.navigation_point[0] if self.rover.navigation_point else 0,self.rover.navigation_point[1] if self.rover.navigation_point else 0,self.orglatitude,self.orglongitude)
+        self.pub_target_coordinates.publish(target_coordinates)
+        print(f"Target Coordinates xy2ll = [lat: {target_coordinates.latitude}, lon: {target_coordinates.longitude}]")
 
 
 def main(args=None):

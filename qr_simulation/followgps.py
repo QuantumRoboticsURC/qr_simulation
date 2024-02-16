@@ -10,7 +10,7 @@ from .submodules.alvinxy import *
 from geometry_msgs.msg import Twist, Quaternion
 from sensor_msgs.msg import NavSatFix,Imu
 from std_msgs.msg import Int8,Bool
-from ublox_ubx_msgs.msg import UBXNavHPPosLLH
+#from ublox_ubx_msgs.msg import UBXNavHPPosLLH
 from custom_interfaces.srv import FollowGPS
 from custom_interfaces.msg import TargetCoordinates,Coordinates
 from std_msgs.msg import Float64
