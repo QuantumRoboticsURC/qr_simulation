@@ -7,6 +7,7 @@ import rclpy, pygame, math, bisect, copy, random, time, numpy as np
 from enum import Enum
 from rclpy.node import Node
 from std_msgs.msg import Bool, Int8, Float64
+from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Twist
 from custom_interfaces.msg import TargetCoordinates, Coordinates
 from .submodules.alvinxy import xy2ll
@@ -56,6 +57,7 @@ class Simulator(Node):
         self.sub_arrived = self.create_subscription(Bool, "/arrived", self.arrived_callback, 10)
         self.pub_coordinates = self.create_publisher(Coordinates,'/coordinates',10)
         self.pub_target_coordinates = self.create_publisher(TargetCoordinates,'/target_coordinates',10)
+        self.pub_nav_sat_fix_coordinates = self.create_publisher(NavSatFix,'/nav_sat_fix_coordinates',10)
         self.pub_angle = self.create_publisher(Float64,'/angle',10)
         
         #ROS 2 timer routines
@@ -262,6 +264,11 @@ class Simulator(Node):
         angle = Float64()
         angle.data = self.rover.angle
         self.pub_angle.publish(angle)
+
+        nav_sat_fix_coordinates = NavSatFix()
+        nav_sat_fix_coordinates.latitude, nav_sat_fix_coordinates.longitude = coordinates.latitude,coordinates.longitude
+        self.pub_nav_sat_fix_coordinates.publish(nav_sat_fix_coordinates)
+
         print(f"Coordinates xy2ll = [lat: {coordinates.latitude}, lon: {coordinates.longitude}]")
     
     def target_coordinates_callback(self):
