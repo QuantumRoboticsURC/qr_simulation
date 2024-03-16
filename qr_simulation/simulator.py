@@ -265,6 +265,7 @@ class Simulator(Node):
         angle.data = self.rover.angle
         self.pub_angle.publish(angle)
 
+        #Test for Mapviz
         nav_sat_fix_coordinates = NavSatFix()
         nav_sat_fix_coordinates.latitude, nav_sat_fix_coordinates.longitude = coordinates.latitude,coordinates.longitude
         self.pub_nav_sat_fix_coordinates.publish(nav_sat_fix_coordinates)

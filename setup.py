@@ -23,8 +23,12 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': ['pygame=qr_simulation.main:main','mover=qr_simulation.mover:main','fg_sim=qr_simulation.followgps:main', 'simulator=qr_simulation.simulator:main',
-                            'fake=qr_simulation.controller_pirata:main' 
+        'console_scripts': ['pygame=qr_simulation.main:main',
+                            'mover=qr_simulation.mover:main',
+                            'fg_sim=qr_simulation.followgps:main',
+                            'simulator=qr_simulation.simulator:main',
+                            'searching=qr_simulation.searching:main',
+                            'fake=qr_simulation.controller_pirata:main'
         ],
     },
 )
