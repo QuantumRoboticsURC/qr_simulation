@@ -38,7 +38,7 @@ class Simulator(Node):
         self.orglatitude = 19.5970212
         self.orglongitude = -99.227144
         self.rover = self.Rover((400, 400), ((19.25, 19.75), (-99, -99.50)), (0.05, 0.05), pygame.time.get_ticks())
-        self.archimedean_spiral = self.ArchimedeanSpiral(7, 7, 150, 500)
+        self.archimedean_spiral = self.ArchimedeanSpiral(7, 2, 150, 500)
 
         #Pygame variable members and configuration
         pygame.init()
